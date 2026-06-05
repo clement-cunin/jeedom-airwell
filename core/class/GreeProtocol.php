@@ -214,7 +214,7 @@ class GreeProtocol {
         $cols = [
             'Pow', 'Mod', 'SetTem', 'WdSpd', 'Air', 'Blo', 'Health',
             'SwhSlp', 'Lig', 'SwingLfRig', 'SwUpDn', 'Quiet', 'Tur',
-            'StHt', 'TemUn', 'HeatCoolType', 'TemRec', 'SvSt',
+            'StHt', 'TemUn', 'HeatCoolType', 'TemRec', 'SvSt', 'TemSen',
         ];
 
         $payload   = ['mac' => $mac, 't' => 'status', 'cols' => $cols];

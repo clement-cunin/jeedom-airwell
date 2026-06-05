@@ -20,10 +20,14 @@ class airwell extends eqLogic {
             $cipher  = $this->getConfiguration('cipher', 'v1');
             $status  = GreeProtocol::getStatus($ip, $mac, $key, $cipher);
             $modeStr = GreeProtocol::MODES_INV[$status['Mod'] ?? 0] ?? 'auto';
-            $this->checkAndUpdateCmd('power',    $status['Pow']    ?? 0);
-            $this->checkAndUpdateCmd('mode',     $modeStr);
-            $this->checkAndUpdateCmd('setpoint', $status['SetTem'] ?? 0);
-            $this->checkAndUpdateCmd('fanspeed', $status['WdSpd']  ?? 0);
+            $this->checkAndUpdateCmd('power',         $status['Pow']    ?? 0);
+            $this->checkAndUpdateCmd('mode',          $modeStr);
+            $this->checkAndUpdateCmd('setpoint',      $status['SetTem'] ?? 0);
+            $this->checkAndUpdateCmd('fanspeed',      $status['WdSpd']  ?? 0);
+            $this->checkAndUpdateCmd('display',       $status['Lig']    ?? 0);
+            if (isset($status['TemSen'])) {
+                $this->checkAndUpdateCmd('internal_temp', $status['TemSen']);
+            }
         } catch (Exception $e) {
             log::add('airwell', 'error', "refreshStatus [{$this->getName()}]: " . $e->getMessage());
         }
@@ -78,6 +82,58 @@ class airwell extends eqLogic {
         $fanspeed->setSubType('numeric');
         $fanspeed->setEqLogic_id($this->getId());
         $fanspeed->save();
+
+        $cmdSetFanspeed = $this->getCmd('action', 'set_fanspeed');
+        if (!is_object($cmdSetFanspeed)) {
+            $cmdSetFanspeed = new airwellCmd();
+            $cmdSetFanspeed->setLogicalId('set_fanspeed');
+            $cmdSetFanspeed->setIsVisible(1);
+            $cmdSetFanspeed->setName(__('Régler vitesse ventilateur', __FILE__));
+        }
+        $cmdSetFanspeed->setType('action');
+        $cmdSetFanspeed->setSubType('slider');
+        $cmdSetFanspeed->setConfiguration('minValue', 0);
+        $cmdSetFanspeed->setConfiguration('maxValue', 5);
+        $cmdSetFanspeed->setEqLogic_id($this->getId());
+        $cmdSetFanspeed->save();
+
+        $display = $this->getCmd('info', 'display');
+        if (!is_object($display)) {
+            $display = new airwellCmd();
+            $display->setLogicalId('display');
+            $display->setIsVisible(1);
+            $display->setName(__('Affichage', __FILE__));
+        }
+        $display->setType('info');
+        $display->setSubType('binary');
+        $display->setEqLogic_id($this->getId());
+        $display->save();
+
+        $cmdSetDisplay = $this->getCmd('action', 'set_display');
+        if (!is_object($cmdSetDisplay)) {
+            $cmdSetDisplay = new airwellCmd();
+            $cmdSetDisplay->setLogicalId('set_display');
+            $cmdSetDisplay->setIsVisible(1);
+            $cmdSetDisplay->setName(__('Allumer/éteindre affichage', __FILE__));
+        }
+        $cmdSetDisplay->setType('action');
+        $cmdSetDisplay->setSubType('select');
+        $cmdSetDisplay->setConfiguration('listValue', '1|Allumé;0|Éteint');
+        $cmdSetDisplay->setEqLogic_id($this->getId());
+        $cmdSetDisplay->save();
+
+        $internalTemp = $this->getCmd('info', 'internal_temp');
+        if (!is_object($internalTemp)) {
+            $internalTemp = new airwellCmd();
+            $internalTemp->setLogicalId('internal_temp');
+            $internalTemp->setIsVisible(1);
+            $internalTemp->setName(__('Température interne', __FILE__));
+        }
+        $internalTemp->setType('info');
+        $internalTemp->setSubType('numeric');
+        $internalTemp->setUnite('°C');
+        $internalTemp->setEqLogic_id($this->getId());
+        $internalTemp->save();
 
         $cmdOn = $this->getCmd('action', 'turn_on');
         if (!is_object($cmdOn)) {
@@ -156,6 +212,12 @@ class airwellCmd extends cmd {
                 break;
             case 'set_mode':
                 $params = ['Mod' => GreeProtocol::MODES[$_options['select'] ?? 'auto'] ?? 0];
+                break;
+            case 'set_fanspeed':
+                $params = ['WdSpd' => (int)($_options['slider'] ?? 0)];
+                break;
+            case 'set_display':
+                $params = ['Lig' => (int)($_options['select'] ?? 0)];
                 break;
             default:
                 throw new Exception("Commande inconnue: " . $this->getLogicalId());
