@@ -24,23 +24,62 @@ $(() => {
         });
     });
 
-    $("#bt_scanDevices").off("click").on("click", () => {
-        const panel = $("#div_scanResults");
-        if (panel.is(":visible")) {
-            panel.hide();
-        } else {
-            panel.show();
-            launchScan();
-        }
-    });
-
-    $("#bt_scanLaunch").off("click").on("click", launchScan);
+    $("#bt_scanDevices").off("click").on("click", openScanModal);
 });
+
+// ── Scan modal ────────────────────────────────────────────────────────────────
+
+function openScanModal() {
+    if ($("#modal_airwellScan").length === 0) {
+        $("body").append(
+            '<div id="modal_airwellScan" style="display:none;">' +
+            '  <div style="margin-bottom:10px;">' +
+            '    <div class="input-group">' +
+            '      <input type="text" id="in_broadcastIp" class="form-control" value="255.255.255.255">' +
+            '      <span class="input-group-btn">' +
+            '        <button class="btn btn-default" id="bt_scanLaunch" type="button">' +
+            '          <i class="fas fa-sync-alt"></i> {{Rescanner}}' +
+            '        </button>' +
+            '      </span>' +
+            '    </div>' +
+            '  </div>' +
+            '  <div id="div_scanDeviceList"></div>' +
+            '</div>'
+        );
+    }
+
+    $("#modal_airwellScan").dialog({
+        title: "{{Scanner le réseau — appareils Airwell}}",
+        width: 560,
+        maxHeight: 600,
+        modal: true,
+        buttons: [
+            {
+                text: "{{Importer tout}}",
+                id: "bt_importAll",
+                class: "btn btn-success",
+                click: importAll,
+            },
+            {
+                text: "{{Fermer}}",
+                class: "btn btn-default",
+                click: function () { $(this).dialog("close"); },
+            },
+        ],
+        open: function () {
+            $("#bt_importAll").prop("disabled", true);
+            $("#bt_scanLaunch").off("click").on("click", launchScan);
+            launchScan();
+        },
+    });
+}
 
 function launchScan() {
     const broadcastIp = $("#in_broadcastIp").val() || "255.255.255.255";
     const list = $("#div_scanDeviceList");
-    list.html('<i class="fas fa-spinner fa-spin"></i> {{Scan en cours…}}');
+    $("#bt_importAll").prop("disabled", true);
+    list.html('<p><i class="fas fa-spinner fa-spin"></i> {{Scan en cours…}}</p>');
+
     $.ajax({
         type: "POST",
         url: "plugins/airwell/core/ajax/airwell.ajax.php",
@@ -48,42 +87,54 @@ function launchScan() {
         dataType: "json",
         success: (data) => {
             if (data.state !== "ok") {
-                list.html('<span class="text-danger">' + data.result + '</span>');
+                list.html('<p class="text-danger">' + data.result + "</p>");
                 return;
             }
             const devices = data.result;
             if (!devices || !devices.length) {
-                list.html('<em class="text-muted">{{Aucun appareil trouvé}}</em>');
+                list.html('<p class="text-muted">{{Aucun appareil trouvé}}</p>');
                 return;
             }
-            list.empty();
-            devices.forEach((d) => {
-                const label = d.name ? d.name : d.mac;
-                const sub = d.ip + (d.brand ? " · " + d.brand : "") + (d.ver ? " " + d.ver : "");
-                const card = $(
-                    '<div style="border:1px solid #ddd; border-radius:4px; padding:6px 8px; margin-bottom:6px;">' +
-                    '<strong>' + label + '</strong><br>' +
-                    '<small class="text-muted">' + sub + '</small><br>' +
-                    '<button class="btn btn-xs btn-success bt_import" style="margin-top:4px;">' +
-                    '<i class="fas fa-plus"></i> {{Importer}}</button>' +
-                    '</div>'
-                );
-                card.find(".bt_import").on("click", function () {
-                    importDevice(d, $(this));
-                });
-                list.append(card);
-            });
+            renderDevices(devices);
+            $("#bt_importAll").prop("disabled", false);
         },
-        error: (request, status, error) => {
-            list.html('<span class="text-danger">' + error + '</span>');
+        error: (_req, _status, error) => {
+            list.html('<p class="text-danger">' + error + "</p>");
         },
     });
 }
 
-function importDevice(device, btn) {
+function renderDevices(devices) {
+    const list = $("#div_scanDeviceList");
+    list.empty();
+
+    devices.forEach((d, i) => {
+        const label = d.name || d.mac;
+        const sub = d.ip + (d.brand ? " · " + d.brand : "") + (d.ver ? " " + d.ver : "");
+        list.append(
+            $('<div class="airwell-device-card" style="border:1px solid #ddd;border-radius:4px;padding:8px 10px;margin-bottom:8px;">')
+                .attr("data-index", i)
+                .append($("<strong>").text(label))
+                .append("<br>")
+                .append($('<small class="text-muted">').text(sub))
+                .append("<br>")
+                .append(
+                    $('<button class="btn btn-xs btn-success bt_importOne" style="margin-top:6px;">')
+                        .html('<i class="fas fa-plus"></i> {{Importer}}')
+                        .on("click", function () { importDevice(d, $(this)); })
+                )
+                .data("device", d)
+        );
+    });
+}
+
+// ── Import helpers ─────────────────────────────────────────────────────────────
+
+function importDevice(device, btn, onDone) {
     btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin"></i>');
     const name = device.name || ("Airwell " + device.mac.toUpperCase());
-    $.ajax({
+
+    return $.ajax({
         type: "POST",
         url: "plugins/airwell/core/ajax/airwell.ajax.php",
         data: { action: "importDevice", ip: device.ip, mac: device.mac, name: name },
@@ -92,47 +143,69 @@ function importDevice(device, btn) {
             if (data.state !== "ok") {
                 btn.prop("disabled", false).html('<i class="fas fa-plus"></i> {{Importer}}');
                 $.fn.showAlert({ message: data.result, level: "danger" });
+                if (onDone) onDone(false);
                 return;
             }
             const res = data.result;
             const msg = res.bindOk
-                ? "{{Importé et bindé avec succès}}"
-                : "{{Importé — binding à faire manuellement (appareil injoignable)}}";
-            btn.closest("div").html('<span class="text-success"><i class="fas fa-check"></i> ' + msg + '</span>');
-            // Reload the page to show the new equipment in the sidebar
-            setTimeout(() => { window.location.reload(); }, 1200);
+                ? '<i class="fas fa-check"></i> {{Importé}}'
+                : '<i class="fas fa-exclamation-triangle"></i> {{Importé (binding manuel requis)}}';
+            btn.closest(".airwell-device-card").html('<span class="text-success">' + msg + "</span>");
+            if (onDone) onDone(true);
         },
-        error: (request, status, error) => {
+        error: (_req, _status, error) => {
             btn.prop("disabled", false).html('<i class="fas fa-plus"></i> {{Importer}}');
             $.fn.showAlert({ message: error, level: "danger" });
+            if (onDone) onDone(false);
         },
     });
 }
 
-// Must be global — Jeedom core calls this to render each command row
+function importAll() {
+    const btn = $("#bt_importAll").prop("disabled", true).html('<i class="fas fa-spinner fa-spin"></i> {{Import en cours…}}');
+    const cards = $(".airwell-device-card");
+    let pending = 0;
+
+    cards.each(function () {
+        const device = $(this).data("device");
+        if (!device) return;
+        const importBtn = $(this).find(".bt_importOne");
+        if (!importBtn.length) return; // already imported
+        pending++;
+        importDevice(device, importBtn, () => {
+            pending--;
+            if (pending === 0) {
+                btn.html('<i class="fas fa-check"></i> {{Terminé}}');
+                setTimeout(() => { window.location.reload(); }, 1500);
+            }
+        });
+    });
+
+    if (pending === 0) {
+        window.location.reload();
+    }
+}
+
+// ── addCmdToTable (global — appelé par le core Jeedom) ───────────────────────
+
 function addCmdToTable(_cmd) {
     if (!isset(_cmd)) _cmd = {};
     if (!isset(_cmd.configuration)) _cmd.configuration = {};
 
     var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
     tr += '<td class="hidden-xs"><span class="cmdAttr" data-l1key="id"></span></td>';
-    tr += '<td>';
-    tr += '<input class="cmdAttr form-control input-sm" data-l1key="name" placeholder="{{Nom de la commande}}">';
-    tr += '</td>';
+    tr += '<td><input class="cmdAttr form-control input-sm" data-l1key="name" placeholder="{{Nom de la commande}}"></td>';
     tr += '<td>';
     tr += '<span class="type" type="' + init(_cmd.type) + '">' + jeedom.cmd.availableType() + '</span>';
     tr += '<span class="subType" subType="' + init(_cmd.subType) + '"></span>';
     tr += '</td>';
-    tr += '<td>';
-    tr += '<label class="checkbox-inline"><input type="checkbox" class="cmdAttr" data-l1key="isVisible" checked/>{{Afficher}}</label>';
-    tr += '</td>';
+    tr += '<td><label class="checkbox-inline"><input type="checkbox" class="cmdAttr" data-l1key="isVisible" checked/>{{Afficher}}</label></td>';
     tr += '<td>';
     if (is_numeric(_cmd.id)) {
         tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure"><i class="fas fa-cogs"></i></a> ';
         tr += '<a class="btn btn-default btn-xs cmdAction" data-action="test"><i class="fas fa-rss"></i> {{Tester}}</a>';
     }
-    tr += '</td>';
-    tr += '</tr>';
+    tr += '</td></tr>';
 
     var $tr = $(tr);
     $('#table_cmd tbody').append($tr);
