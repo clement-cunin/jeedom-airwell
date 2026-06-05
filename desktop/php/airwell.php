@@ -138,3 +138,6 @@ $eqlogics = eqLogic::byType('airwell');
         </div>
     </div>
 </div>
+
+<?php include_file('desktop', 'airwell', 'js', 'airwell'); ?>
+<?php include_file('core', 'plugin.template', 'js'); ?>
