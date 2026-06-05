@@ -144,13 +144,22 @@ class airwellCmd extends cmd {
         }
 
         $cipher = $eqLogic->getConfiguration('cipher', 'v1');
-        $params = match ($this->getLogicalId()) {
-            'turn_on'         => ['Pow' => 1],
-            'turn_off'        => ['Pow' => 0],
-            'set_temperature' => ['SetTem' => (int)($_options['slider'] ?? 20)],
-            'set_mode'        => ['Mod' => GreeProtocol::MODES[$_options['select'] ?? 'auto'] ?? 0],
-            default           => throw new Exception("Commande inconnue: " . $this->getLogicalId()),
-        };
+        switch ($this->getLogicalId()) {
+            case 'turn_on':
+                $params = ['Pow' => 1];
+                break;
+            case 'turn_off':
+                $params = ['Pow' => 0];
+                break;
+            case 'set_temperature':
+                $params = ['SetTem' => (int)($_options['slider'] ?? 20)];
+                break;
+            case 'set_mode':
+                $params = ['Mod' => GreeProtocol::MODES[$_options['select'] ?? 'auto'] ?? 0];
+                break;
+            default:
+                throw new Exception("Commande inconnue: " . $this->getLogicalId());
+        }
 
         if (!GreeProtocol::sendCommand($ip, $mac, $key, $params, $cipher)) {
             throw new Exception("Airwell [{$eqLogic->getName()}]: commande refusée par le device");
