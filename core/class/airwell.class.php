@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/GreeProtocol.php';
+
 class airwell extends eqLogic {
 
     public static function cron5() {
@@ -8,7 +10,22 @@ class airwell extends eqLogic {
     }
 
     public function refreshStatus() {
-        // Will be implemented in issue #2 (POC)
+        $ip  = $this->getConfiguration('ip');
+        $mac = $this->getConfiguration('mac');
+        $key = $this->getConfiguration('device_key');
+        if (!$ip || !$mac || !$key) {
+            return;
+        }
+        try {
+            $status  = GreeProtocol::getStatus($ip, $mac, $key);
+            $modeStr = GreeProtocol::MODES_INV[$status['Mod'] ?? 0] ?? 'auto';
+            $this->checkAndUpdateCmd('power',    $status['Pow']    ?? 0);
+            $this->checkAndUpdateCmd('mode',     $modeStr);
+            $this->checkAndUpdateCmd('setpoint', $status['SetTem'] ?? 0);
+            $this->checkAndUpdateCmd('fanspeed', $status['WdSpd']  ?? 0);
+        } catch (Exception $e) {
+            log::add('airwell', 'error', "refreshStatus [{$this->getName()}]: " . $e->getMessage());
+        }
     }
 
     public function postSave() {
@@ -117,6 +134,24 @@ class airwell extends eqLogic {
 class airwellCmd extends cmd {
 
     public function execute($_options = []) {
-        // Will be implemented in issue #2 (POC)
+        $eqLogic = $this->getEqLogic();
+        $ip      = $eqLogic->getConfiguration('ip');
+        $mac     = $eqLogic->getConfiguration('mac');
+        $key     = $eqLogic->getConfiguration('device_key');
+        if (!$ip || !$mac || !$key) {
+            throw new Exception("Airwell [{$eqLogic->getName()}]: IP, MAC ou clé device non configurés");
+        }
+
+        $params = match ($this->getLogicalId()) {
+            'turn_on'         => ['Pow' => 1],
+            'turn_off'        => ['Pow' => 0],
+            'set_temperature' => ['SetTem' => (int)($_options['slider'] ?? 20)],
+            'set_mode'        => ['Mod' => GreeProtocol::MODES[$_options['select'] ?? 'auto'] ?? 0],
+            default           => throw new Exception("Commande inconnue: " . $this->getLogicalId()),
+        };
+
+        if (!GreeProtocol::sendCommand($ip, $mac, $key, $params)) {
+            throw new Exception("Airwell [{$eqLogic->getName()}]: commande refusée par le device");
+        }
     }
 }
