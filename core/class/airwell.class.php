@@ -26,7 +26,7 @@ class airwell extends eqLogic {
             $this->checkAndUpdateCmd('fanspeed',      $status['WdSpd']  ?? 0);
             $this->checkAndUpdateCmd('display',       $status['Lig']    ?? 0);
             if (isset($status['TemSen'])) {
-                $this->checkAndUpdateCmd('internal_temp', $status['TemSen'] - 40);
+                $this->checkAndUpdateCmd('internal_temp', round($status['TemSen'] - 40, 1));
             }
         } catch (Exception $e) {
             log::add('airwell', 'error', "refreshStatus [{$this->getName()}]: " . $e->getMessage());
@@ -132,6 +132,7 @@ class airwell extends eqLogic {
         $internalTemp->setType('info');
         $internalTemp->setSubType('numeric');
         $internalTemp->setUnite('°C');
+        $internalTemp->setConfiguration('decimal', 1);
         $internalTemp->setEqLogic_id($this->getId());
         $internalTemp->save();
 
