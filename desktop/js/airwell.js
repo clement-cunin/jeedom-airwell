@@ -30,38 +30,33 @@ $(() => {
     });
 });
 
-// Must be global — Jeedom core calls this to render each command row in the table
+// Must be global — Jeedom core calls this to render each command row
 function addCmdToTable(_cmd) {
     if (!isset(_cmd)) _cmd = {};
     if (!isset(_cmd.configuration)) _cmd.configuration = {};
-    const tr = $("<tr>")
-        .attr({ "data-cmd_id": init(_cmd.id) })
-        .addClass("cmd");
-    tr.append(
-        $("<td>").append(
-            $("<input>")
-                .addClass("cmdAttr form-control input-sm")
-                .attr({ "data-l1key": "name" })
-                .val(init(_cmd.name))
-        )
-    );
-    tr.append(
-        $("<td>").text(init(_cmd.type) + " / " + init(_cmd.subType))
-    );
-    tr.append($("<td>"));
-    tr.append(
-        $("<td>").append(
-            $("<a>")
-                .addClass("btn btn-default btn-xs cmdAction")
-                .attr({ "data-action": "configure" })
-                .html('<i class="fas fa-cogs"></i>')
-        ).append(" ").append(
-            $("<a>")
-                .addClass("btn btn-default btn-xs cmdAction")
-                .attr({ "data-action": "test" })
-                .html('<i class="fas fa-rss"></i> {{Tester}}')
-        )
-    );
-    $("#table_cmd tbody").append(tr);
-    tr.setValues(_cmd, ".cmdAttr");
+
+    var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
+    tr += '<td class="hidden-xs"><span class="cmdAttr" data-l1key="id"></span></td>';
+    tr += '<td>';
+    tr += '<input class="cmdAttr form-control input-sm" data-l1key="name" placeholder="{{Nom de la commande}}">';
+    tr += '</td>';
+    tr += '<td>';
+    tr += '<span class="type" type="' + init(_cmd.type) + '">' + jeedom.cmd.availableType() + '</span>';
+    tr += '<span class="subType" subType="' + init(_cmd.subType) + '"></span>';
+    tr += '</td>';
+    tr += '<td>';
+    tr += '<label class="checkbox-inline"><input type="checkbox" class="cmdAttr" data-l1key="isVisible" checked/>{{Afficher}}</label>';
+    tr += '</td>';
+    tr += '<td>';
+    if (is_numeric(_cmd.id)) {
+        tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure"><i class="fas fa-cogs"></i></a> ';
+        tr += '<a class="btn btn-default btn-xs cmdAction" data-action="test"><i class="fas fa-rss"></i> {{Tester}}</a>';
+    }
+    tr += '</td>';
+    tr += '</tr>';
+
+    var $tr = $(tr);
+    $('#table_cmd tbody').append($tr);
+    $tr.setValues(_cmd, '.cmdAttr');
+    jeedom.cmd.changeType($tr, init(_cmd.subType));
 }
