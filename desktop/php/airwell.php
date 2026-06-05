@@ -17,6 +17,11 @@ $eqlogics = eqLogic::byType('airwell');
                 <br>
                 <span>{{Ajouter}}</span>
             </div>
+            <div class="cursor" id="bt_scanDevices">
+                <i class="fas fa-search"></i>
+                <br>
+                <span>{{Scanner}}</span>
+            </div>
             <?php foreach ($eqlogics as $eqLogic) { ?>
                 <div class="eqLogicDisplayCard cursor" data-eqLogic_id="<?php echo $eqLogic->getId(); ?>">
                     <img src="<?php echo $eqLogic->getImage(); ?>" />
@@ -27,6 +32,17 @@ $eqlogics = eqLogic::byType('airwell');
                     </span>
                 </div>
             <?php } ?>
+        </div>
+        <div id="div_scanResults" style="display:none; margin-top:10px; padding:0 5px;">
+            <div class="input-group input-group-sm">
+                <input type="text" id="in_broadcastIp" class="form-control" value="255.255.255.255" placeholder="255.255.255.255">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" id="bt_scanLaunch" type="button">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </span>
+            </div>
+            <div id="div_scanDeviceList" style="margin-top:8px;"></div>
         </div>
     </div>
 
