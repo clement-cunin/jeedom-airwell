@@ -49,7 +49,10 @@ $eqlogics = eqLogic::byType('airwell');
     <!-- Main panel: equipment form -->
     <div class="col-xs-12 col-sm-9 eqLogic" style="display: none;">
         <div class="input-group pull-right" style="display:inline-flex">
-            <a class="btn btn-default btn-sm eqLogicAction roundedLeft" data-action="configure">
+            <a class="btn btn-default btn-sm eqLogicAction roundedLeft" data-action="returnToThumbnailDisplay">
+                <i class="fas fa-arrow-left"></i> {{Retour}}
+            </a>
+            <a class="btn btn-default btn-sm eqLogicAction" data-action="configure">
                 <i class="fas fa-cogs"></i> {{Configuration avancée}}
             </a>
             <a class="btn btn-default btn-sm eqLogicAction" data-action="copy">
