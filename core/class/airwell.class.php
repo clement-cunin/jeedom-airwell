@@ -28,6 +28,18 @@ class airwell extends eqLogic {
             if (isset($status['TemSen'])) {
                 $this->checkAndUpdateCmd('internal_temp', round($status['TemSen'] - 40, 1));
             }
+            if (isset($status['OutEnvTem'])) {
+                $this->checkAndUpdateCmd('outdoor_temp', round($status['OutEnvTem'] - 40, 1));
+            }
+            if (isset($status['DwatSen'])) {
+                $this->checkAndUpdateCmd('humidity', $status['DwatSen']);
+            }
+            if (isset($status['SlpMod'])) {
+                $this->checkAndUpdateCmd('sleep_mode', $status['SlpMod']);
+            }
+            if (isset($status['AntiDirectBlow'])) {
+                $this->checkAndUpdateCmd('anti_direct_blow', $status['AntiDirectBlow']);
+            }
         } catch (Exception $e) {
             log::add('airwell', 'error', "refreshStatus [{$this->getName()}]: " . $e->getMessage());
         }
@@ -135,6 +147,57 @@ class airwell extends eqLogic {
         $internalTemp->setConfiguration('decimal', 1);
         $internalTemp->setEqLogic_id($this->getId());
         $internalTemp->save();
+
+        $outdoorTemp = $this->getCmd('info', 'outdoor_temp');
+        if (!is_object($outdoorTemp)) {
+            $outdoorTemp = new airwellCmd();
+            $outdoorTemp->setLogicalId('outdoor_temp');
+            $outdoorTemp->setIsVisible(1);
+            $outdoorTemp->setName(__('Température extérieure', __FILE__));
+        }
+        $outdoorTemp->setType('info');
+        $outdoorTemp->setSubType('numeric');
+        $outdoorTemp->setUnite('°C');
+        $outdoorTemp->setConfiguration('decimal', 1);
+        $outdoorTemp->setEqLogic_id($this->getId());
+        $outdoorTemp->save();
+
+        $humidity = $this->getCmd('info', 'humidity');
+        if (!is_object($humidity)) {
+            $humidity = new airwellCmd();
+            $humidity->setLogicalId('humidity');
+            $humidity->setIsVisible(1);
+            $humidity->setName(__('Humidité', __FILE__));
+        }
+        $humidity->setType('info');
+        $humidity->setSubType('numeric');
+        $humidity->setUnite('%');
+        $humidity->setEqLogic_id($this->getId());
+        $humidity->save();
+
+        $sleepMode = $this->getCmd('info', 'sleep_mode');
+        if (!is_object($sleepMode)) {
+            $sleepMode = new airwellCmd();
+            $sleepMode->setLogicalId('sleep_mode');
+            $sleepMode->setIsVisible(1);
+            $sleepMode->setName(__('Mode sleep', __FILE__));
+        }
+        $sleepMode->setType('info');
+        $sleepMode->setSubType('numeric');
+        $sleepMode->setEqLogic_id($this->getId());
+        $sleepMode->save();
+
+        $antiDirectBlow = $this->getCmd('info', 'anti_direct_blow');
+        if (!is_object($antiDirectBlow)) {
+            $antiDirectBlow = new airwellCmd();
+            $antiDirectBlow->setLogicalId('anti_direct_blow');
+            $antiDirectBlow->setIsVisible(1);
+            $antiDirectBlow->setName(__('Anti-soufflage direct', __FILE__));
+        }
+        $antiDirectBlow->setType('info');
+        $antiDirectBlow->setSubType('binary');
+        $antiDirectBlow->setEqLogic_id($this->getId());
+        $antiDirectBlow->save();
 
         $cmdOn = $this->getCmd('action', 'turn_on');
         if (!is_object($cmdOn)) {
