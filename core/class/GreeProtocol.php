@@ -50,18 +50,24 @@ class GreeProtocol {
     // ---- UDP ----------------------------------------------------------------
 
     private static function udpSend(string $ip, string $payload, int $timeout = 5): string {
-        $sock = @fsockopen("udp://$ip", self::PORT, $errno, $errstr, $timeout);
-        if (!$sock) {
-            throw new RuntimeException("GreeProtocol: cannot reach $ip: $errstr ($errno)");
+        $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        if ($sock === false) {
+            throw new RuntimeException('GreeProtocol: socket_create failed: ' . socket_strerror(socket_last_error()));
         }
-        stream_set_timeout($sock, $timeout);
-        fwrite($sock, $payload);
-        $response = fread($sock, 65535);
-        fclose($sock);
-        if ($response === false || $response === '') {
+        socket_set_option($sock, SOL_SOCKET, SO_RCVTIMEO, ['sec' => $timeout, 'usec' => 0]);
+        socket_bind($sock, '0.0.0.0', 0);
+
+        socket_sendto($sock, $payload, strlen($payload), 0, $ip, self::PORT);
+
+        $buf = $from = '';
+        $port = 0;
+        $ret  = @socket_recvfrom($sock, $buf, 65535, 0, $from, $port);
+        socket_close($sock);
+
+        if ($ret === false || $buf === '') {
             throw new RuntimeException("GreeProtocol: no response from $ip (timeout)");
         }
-        return $response;
+        return $buf;
     }
 
     private static function udpBroadcast(string $broadcastIp, string $payload, int $timeout = 3): array {
