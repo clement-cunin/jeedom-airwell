@@ -72,10 +72,11 @@ switch ($cmd) {
 
         hdr("Binding — $ip  ($mac)");
         try {
-            $key = GreeProtocol::bind($ip, $mac);
-            ok("Binding réussi");
-            echo "  Clé device : $key\n";
-            echo "\n  → Copiez cette clé dans la configuration Jeedom de l'équipement.\n";
+            $result = GreeProtocol::bind($ip, $mac);
+            ok("Binding réussi (cipher=" . $result['cipher'] . ")");
+            echo "  Clé device : " . $result['key'] . "\n";
+            echo "  Cipher     : " . $result['cipher'] . "\n";
+            echo "\n  → Notez la clé ET le cipher pour les commandes suivantes.\n";
         } catch (Exception $e) {
             err($e->getMessage());
         }
@@ -83,12 +84,12 @@ switch ($cmd) {
 
     // ---- status -------------------------------------------------------------
     case 'status':
-        [$ip, $mac, $key] = [$argv[2] ?? null, $argv[3] ?? null, $argv[4] ?? null];
-        if (!$ip || !$mac || !$key) err("Usage: php test_gree.php status <ip> <mac> <key>");
+        [$ip, $mac, $key, $cipher] = [$argv[2] ?? null, $argv[3] ?? null, $argv[4] ?? null, $argv[5] ?? 'v1'];
+        if (!$ip || !$mac || !$key) err("Usage: php test_gree.php status <ip> <mac> <key> [v1|v2]");
 
-        hdr("Lecture état — $ip");
+        hdr("Lecture état — $ip  (cipher=$cipher)");
         try {
-            $status = GreeProtocol::getStatus($ip, $mac, $key);
+            $status = GreeProtocol::getStatus($ip, $mac, $key, $cipher);
             ok("Réponse reçue");
             dumpStatus($status);
         } catch (Exception $e) {
@@ -98,22 +99,22 @@ switch ($cmd) {
 
     // ---- cmd ----------------------------------------------------------------
     case 'cmd':
-        [$ip, $mac, $key] = [$argv[2] ?? null, $argv[3] ?? null, $argv[4] ?? null];
-        if (!$ip || !$mac || !$key || !isset($argv[5])) {
-            err("Usage: php test_gree.php cmd <ip> <mac> <key> Param=valeur [...]");
+        [$ip, $mac, $key, $cipher] = [$argv[2] ?? null, $argv[3] ?? null, $argv[4] ?? null, $argv[5] ?? 'v1'];
+        if (!$ip || !$mac || !$key || !isset($argv[6])) {
+            err("Usage: php test_gree.php cmd <ip> <mac> <key> [v1|v2] Param=valeur [...]");
         }
 
         $params = [];
-        foreach (array_slice($argv, 5) as $arg) {
+        foreach (array_slice($argv, 6) as $arg) {
             [$k, $v] = explode('=', $arg, 2) + [null, null];
             if (!$k || $v === null) err("Format invalide: $arg  (attendu: Param=valeur)");
             $params[$k] = is_numeric($v) ? (int)$v : $v;
         }
 
-        hdr("Envoi commande — $ip");
+        hdr("Envoi commande — $ip  (cipher=$cipher)");
         echo "  Paramètres : " . json_encode($params) . "\n";
         try {
-            $ok = GreeProtocol::sendCommand($ip, $mac, $key, $params);
+            $ok = GreeProtocol::sendCommand($ip, $mac, $key, $params, $cipher);
             $ok ? ok("Commande acceptée (r=200)") : err("Commande refusée par le device");
         } catch (Exception $e) {
             err($e->getMessage());

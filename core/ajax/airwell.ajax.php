@@ -20,10 +20,11 @@ try {
             if (!$ip || !$mac) {
                 throw new Exception('Renseignez l\'IP et la MAC avant de lancer le binding');
             }
-            $key = GreeProtocol::bind($ip, $mac);
-            $eqLogic->setConfiguration('device_key', $key);
+            $result = GreeProtocol::bind($ip, $mac);
+            $eqLogic->setConfiguration('device_key', $result['key']);
+            $eqLogic->setConfiguration('cipher', $result['cipher']);
             $eqLogic->save();
-            ajax::success($key);
+            ajax::success($result);
             break;
         default:
             throw new Exception('Unknown action: ' . init('action'));
