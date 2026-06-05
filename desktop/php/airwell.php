@@ -4,6 +4,7 @@ if (!isConnect('admin')) {
 }
 $plugin = plugin::byId('airwell');
 sendVarToJS('eqType', $plugin->getId());
+sendVarToJS('airwellDocUrl', 'index.php?v=d&p=plugin&id=airwell');
 $eqlogics = eqLogic::byType('airwell');
 ?>
 
@@ -18,10 +19,13 @@ $eqlogics = eqLogic::byType('airwell');
                 <span>{{Ajouter}}</span>
             </div>
             <div class="cursor" id="bt_scanDevices">
-                <i class="fas fa-search"></i>
+                <i class="fas fa-magic"></i>
                 <br>
-                <span>{{Scanner}}</span>
+                <span>{{Import automatique}}</span>
             </div>
+        </div>
+        <legend><i class="fas fa-snowflake"></i> {{Mes équipements}}</legend>
+        <div class="eqLogicThumbnailContainer">
             <?php foreach ($eqlogics as $eqLogic) { ?>
                 <div class="eqLogicDisplayCard cursor" data-eqLogic_id="<?php echo $eqLogic->getId(); ?>">
                     <img src="<?php echo $eqLogic->getImage(); ?>" />

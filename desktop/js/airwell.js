@@ -49,7 +49,7 @@ function openScanModal() {
     }
 
     $("#modal_airwellScan").dialog({
-        title: "{{Scanner le réseau — appareils Airwell}}",
+        title: "{{Import automatique — appareils Airwell}}",
         width: 560,
         maxHeight: 600,
         modal: true,
@@ -92,7 +92,10 @@ function launchScan() {
             }
             const devices = data.result;
             if (!devices || !devices.length) {
-                list.html('<p class="text-muted">{{Aucun appareil trouvé}}</p>');
+                list.html(
+                    '<p class="text-muted">{{Aucun appareil trouvé}}</p>' +
+                    '<p><a href="' + airwellDocUrl + '" target="_blank">{{Que faire si mes appareils ne sont pas trouvés ?}}</a></p>'
+                );
                 return;
             }
             renderDevices(devices);
@@ -142,7 +145,10 @@ function importDevice(device, btn, onDone) {
         success: (data) => {
             if (data.state !== "ok") {
                 btn.prop("disabled", false).html('<i class="fas fa-plus"></i> {{Importer}}');
-                $.fn.showAlert({ message: data.result, level: "danger" });
+                $.fn.showAlert({
+                    message: data.result + ' — <a href="' + airwellDocUrl + '" target="_blank">{{Voir la documentation}}</a>',
+                    level: "danger",
+                });
                 if (onDone) onDone(false);
                 return;
             }
