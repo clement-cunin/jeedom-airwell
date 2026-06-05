@@ -3,6 +3,27 @@ require_once __DIR__ . '/GreeProtocol.php';
 
 class airwell extends eqLogic {
 
+    public function toHtml($_version = 'dashboard') {
+        $templatePath = __DIR__ . '/../template/' . $_version . '/eqLogic.html';
+        if (!file_exists($templatePath)) {
+            return parent::toHtml($_version);
+        }
+        $template = file_get_contents($templatePath);
+        $template = str_replace('#eqLogic_id#', $this->getId(), $template);
+        $template = str_replace('#name#', htmlspecialchars($this->getName()), $template);
+        foreach ($this->getCmd() as $cmd) {
+            $template = str_replace('#cmd_id_' . $cmd->getLogicalId() . '#', $cmd->getId(), $template);
+            if ($cmd->getType() == 'info') {
+                $value = $cmd->execCmd();
+                $safe  = is_null($value) ? '' : htmlspecialchars((string)$value, ENT_QUOTES);
+                $template = str_replace('#cmd_value_' . $cmd->getLogicalId() . '#', $safe, $template);
+            }
+        }
+        $template = preg_replace('/#cmd_id_\w+#/', '0', $template);
+        $template = preg_replace('/#cmd_value_\w+#/', '', $template);
+        return $template;
+    }
+
     public static function cron5() {
         foreach (eqLogic::byType('airwell', true) as $eqLogic) {
             $eqLogic->refreshStatus();
@@ -25,6 +46,7 @@ class airwell extends eqLogic {
             $this->checkAndUpdateCmd('setpoint',      $status['SetTem'] ?? 0);
             $this->checkAndUpdateCmd('fanspeed',      $status['WdSpd']  ?? 0);
             $this->checkAndUpdateCmd('display',       $status['Lig']    ?? 0);
+            $this->checkAndUpdateCmd('swing_v',       $status['SwUpDn'] ?? 0);
             if (isset($status['TemSen'])) {
                 $this->checkAndUpdateCmd('internal_temp', round($status['TemSen'] - 40, 1));
             }
@@ -104,7 +126,7 @@ class airwell extends eqLogic {
         }
         $cmdSetFanspeed->setType('action');
         $cmdSetFanspeed->setSubType('slider');
-        $cmdSetFanspeed->setConfiguration('minValue', 0);
+        $cmdSetFanspeed->setConfiguration('minValue', 1);
         $cmdSetFanspeed->setConfiguration('maxValue', 5);
         $cmdSetFanspeed->setEqLogic_id($this->getId());
         $cmdSetFanspeed->save();
@@ -246,9 +268,34 @@ class airwell extends eqLogic {
         }
         $cmdSetMode->setType('action');
         $cmdSetMode->setSubType('select');
-        $cmdSetMode->setConfiguration('listValue', 'auto|Auto;cool|Froid;heat|Chaud;dry|Déshumidification;fan_only|Ventilation');
+        $cmdSetMode->setConfiguration('listValue', 'cool|Froid;heat|Chaud;dry|Déshumidification;fan_only|Ventilation');
         $cmdSetMode->setEqLogic_id($this->getId());
         $cmdSetMode->save();
+
+        $swingV = $this->getCmd('info', 'swing_v');
+        if (!is_object($swingV)) {
+            $swingV = new airwellCmd();
+            $swingV->setLogicalId('swing_v');
+            $swingV->setIsVisible(1);
+            $swingV->setName(__('Orientation verticale', __FILE__));
+        }
+        $swingV->setType('info');
+        $swingV->setSubType('numeric');
+        $swingV->setEqLogic_id($this->getId());
+        $swingV->save();
+
+        $cmdSetSwingV = $this->getCmd('action', 'set_swing_v');
+        if (!is_object($cmdSetSwingV)) {
+            $cmdSetSwingV = new airwellCmd();
+            $cmdSetSwingV->setLogicalId('set_swing_v');
+            $cmdSetSwingV->setIsVisible(1);
+            $cmdSetSwingV->setName(__('Régler orientation verticale', __FILE__));
+        }
+        $cmdSetSwingV->setType('action');
+        $cmdSetSwingV->setSubType('select');
+        $cmdSetSwingV->setConfiguration('listValue', '1|Oscillation;2|Haut;3|Haut-milieu;4|Milieu;5|Bas-milieu;6|Bas');
+        $cmdSetSwingV->setEqLogic_id($this->getId());
+        $cmdSetSwingV->save();
     }
 }
 
@@ -282,6 +329,9 @@ class airwellCmd extends cmd {
                 break;
             case 'set_display':
                 $params = ['Lig' => (int)($_options['select'] ?? 0)];
+                break;
+            case 'set_swing_v':
+                $params = ['SwUpDn' => (int)($_options['select'] ?? 0)];
                 break;
             default:
                 throw new Exception("Commande inconnue: " . $this->getLogicalId());

@@ -1,0 +1,419 @@
+<div class="airwell-panel" id="airwell-#eqLogic_id#" data-eqlogic_id="#eqLogic_id#"
+     data-v-power="#cmd_value_power#"
+     data-v-mode="#cmd_value_mode#"
+     data-v-setpoint="#cmd_value_setpoint#"
+     data-v-fanspeed="#cmd_value_fanspeed#"
+     data-v-swing="#cmd_value_swing_v#"
+     data-v-display="#cmd_value_display#"
+     data-v-int-temp="#cmd_value_internal_temp#"
+     data-v-ext-temp="#cmd_value_outdoor_temp#">
+  <style>
+    #airwell-#eqLogic_id# {
+      padding: 8px;
+      box-sizing: border-box;
+      font-family: inherit;
+      color: inherit;
+    }
+    #airwell-#eqLogic_id# .aw-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    #airwell-#eqLogic_id# .aw-name {
+      font-weight: bold;
+      font-size: 1em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 75%;
+    }
+    #airwell-#eqLogic_id# .aw-header-btns {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    #airwell-#eqLogic_id# .aw-btn-power,
+    #airwell-#eqLogic_id# .aw-btn-display {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      font-size: 1em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #95a5a6;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    #airwell-#eqLogic_id# .aw-btn-power.aw-active {
+      background: #2ecc71;
+    }
+    #airwell-#eqLogic_id# .aw-btn-display.aw-active {
+      background: #f39c12;
+    }
+    #airwell-#eqLogic_id# .aw-section {
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(128,128,128,0.2);
+    }
+    #airwell-#eqLogic_id# .aw-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    #airwell-#eqLogic_id# .aw-section-label {
+      font-size: 0.72em;
+      opacity: 0.6;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    #airwell-#eqLogic_id# .aw-setpoint-row {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+    #airwell-#eqLogic_id# .aw-setpoint-val {
+      font-size: 1.6em;
+      font-weight: bold;
+      line-height: 1;
+    }
+    #airwell-#eqLogic_id# .aw-unit {
+      font-size: 0.85em;
+      opacity: 0.7;
+    }
+    #airwell-#eqLogic_id# .aw-slider {
+      width: 100%;
+      margin: 2px 0;
+    }
+    #airwell-#eqLogic_id# .aw-slider-bounds {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68em;
+      opacity: 0.5;
+      margin-top: 1px;
+    }
+    #airwell-#eqLogic_id# .aw-select {
+      width: 100%;
+      padding: 5px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(128,128,128,0.35);
+      background: transparent;
+      color: inherit;
+      font-size: 0.9em;
+    }
+    #airwell-#eqLogic_id# .aw-fan-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #airwell-#eqLogic_id# .aw-fan-slider-wrap {
+      flex: 1;
+    }
+    #airwell-#eqLogic_id# .aw-fan-val {
+      min-width: 2.8em;
+      text-align: right;
+      font-weight: bold;
+      font-size: 0.95em;
+    }
+    #airwell-#eqLogic_id# .aw-sensors {
+      display: flex;
+      gap: 8px;
+    }
+    #airwell-#eqLogic_id# .aw-sensor {
+      flex: 1;
+      text-align: center;
+      padding: 4px;
+      border-radius: 4px;
+      background: rgba(128,128,128,0.08);
+    }
+    #airwell-#eqLogic_id# .aw-sensor-lbl {
+      display: block;
+      font-size: 0.68em;
+      opacity: 0.6;
+      margin-bottom: 2px;
+    }
+    #airwell-#eqLogic_id# .aw-sensor-val {
+      font-size: 1.05em;
+      font-weight: 600;
+    }
+  </style>
+
+  <!-- Header : nom + icône affichage + bouton ON/OFF -->
+  <div class="aw-header">
+    <span class="aw-name">#name#</span>
+    <div class="aw-header-btns">
+      <button class="aw-btn-display" id="aw-display-btn-#eqLogic_id#" title="Affichage LED">☀</button>
+      <button class="aw-btn-power" id="aw-power-btn-#eqLogic_id#" title="Allumer/Éteindre">⏻</button>
+    </div>
+  </div>
+
+  <!-- Température de consigne -->
+  <div class="aw-section">
+    <div class="aw-section-label">Consigne</div>
+    <div class="aw-setpoint-row">
+      <span class="aw-setpoint-val" id="aw-setpoint-lbl-#eqLogic_id#">--</span>
+      <span class="aw-unit">°C</span>
+    </div>
+    <input type="range" class="aw-slider" id="aw-setpoint-slider-#eqLogic_id#" min="16" max="30" step="1" value="22">
+    <div class="aw-slider-bounds"><span>16°C</span><span>30°C</span></div>
+  </div>
+
+  <!-- Mode de fonctionnement -->
+  <div class="aw-section">
+    <div class="aw-section-label">Mode</div>
+    <select class="aw-select" id="aw-mode-sel-#eqLogic_id#">
+      <option value="cool">Froid</option>
+      <option value="heat">Chaud</option>
+      <option value="dry">Déshumidification</option>
+      <option value="fan_only">Ventilation</option>
+    </select>
+  </div>
+
+  <!-- Vitesse du ventilateur -->
+  <div class="aw-section" id="aw-fan-section-#eqLogic_id#">
+    <div class="aw-section-label">Ventilateur</div>
+    <div class="aw-fan-row">
+      <span>🌬</span>
+      <div class="aw-fan-slider-wrap">
+        <input type="range" class="aw-slider" id="aw-fan-slider-#eqLogic_id#" min="1" max="5" step="1" value="1">
+      </div>
+      <span class="aw-fan-val" id="aw-fan-lbl-#eqLogic_id#">0</span>
+    </div>
+  </div>
+
+  <!-- Orientation verticale (swing) -->
+  <div class="aw-section" id="aw-swing-section-#eqLogic_id#">
+    <div class="aw-section-label">Orientation</div>
+    <select class="aw-select" id="aw-swing-sel-#eqLogic_id#">
+      <option value="1">Oscillation</option>
+      <option value="2">Haut</option>
+      <option value="3">Haut-milieu</option>
+      <option value="4">Milieu</option>
+      <option value="5">Bas-milieu</option>
+      <option value="6">Bas</option>
+    </select>
+  </div>
+
+  <!-- Capteurs de température (optionnels) -->
+  <div class="aw-section" id="aw-sensors-section-#eqLogic_id#">
+    <div class="aw-section-label">Températures</div>
+    <div class="aw-sensors">
+      <div class="aw-sensor" id="aw-int-temp-#eqLogic_id#">
+        <span class="aw-sensor-lbl">Intérieur</span>
+        <span class="aw-sensor-val">--</span>°C
+      </div>
+      <div class="aw-sensor" id="aw-ext-temp-#eqLogic_id#">
+        <span class="aw-sensor-lbl">Extérieur</span>
+        <span class="aw-sensor-val">--</span>°C
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var eqId = '#eqLogic_id#';
+
+  var C = {
+    power:    parseInt('#cmd_id_power#')           || 0,
+    mode:     parseInt('#cmd_id_mode#')            || 0,
+    setpoint: parseInt('#cmd_id_setpoint#')        || 0,
+    fanspeed: parseInt('#cmd_id_fanspeed#')        || 0,
+    intTemp:  parseInt('#cmd_id_internal_temp#')   || 0,
+    extTemp:  parseInt('#cmd_id_outdoor_temp#')    || 0,
+    turnOn:   parseInt('#cmd_id_turn_on#')         || 0,
+    turnOff:  parseInt('#cmd_id_turn_off#')        || 0,
+    setTemp:  parseInt('#cmd_id_set_temperature#') || 0,
+    setMode:  parseInt('#cmd_id_set_mode#')        || 0,
+    setFan:      parseInt('#cmd_id_set_fanspeed#')    || 0,
+    display:     parseInt('#cmd_id_display#')         || 0,
+    setDisplay:  parseInt('#cmd_id_set_display#')     || 0,
+    swingV:      parseInt('#cmd_id_swing_v#')         || 0,
+    setSwingV:   parseInt('#cmd_id_set_swing_v#')     || 0,
+  };
+
+  var powerOn  = 0;
+  var debTemp  = null;
+  var debFan   = null;
+
+  function el(id) {
+    return document.getElementById('aw-' + id + '-' + eqId);
+  }
+
+  function exec(id, opts) {
+    if (!id) return;
+    jeedom.cmd.execute({ id: id, value: opts || {}, success: function () {}, error: function () {} });
+  }
+
+  function setPower(v) {
+    powerOn = parseInt(v);
+    var btn = el('power-btn');
+    if (!btn) return;
+    btn.classList.toggle('aw-active', powerOn === 1);
+    btn.title = powerOn ? 'Éteindre' : 'Allumer';
+  }
+
+  function setSetpoint(v) {
+    var lbl    = el('setpoint-lbl');
+    var slider = el('setpoint-slider');
+    if (lbl)    lbl.textContent = v;
+    if (slider) slider.value = v;
+  }
+
+  function setMode(v) {
+    var sel = el('mode-sel');
+    if (sel) sel.value = v;
+  }
+
+  function setFanSpeed(v) {
+    var slider = el('fan-slider');
+    var lbl    = el('fan-lbl');
+    if (slider) slider.value = v;
+    if (lbl)    lbl.textContent = v;
+  }
+
+  var displayOn = 0;
+
+  function setDisplay(v) {
+    displayOn = parseInt(v);
+    var btn = el('display-btn');
+    if (!btn) return;
+    btn.classList.toggle('aw-active', displayOn === 1);
+    btn.title = displayOn ? 'Affichage LED allumé' : 'Affichage LED éteint';
+  }
+
+  function init() {
+    var panel = document.getElementById('airwell-' + eqId);
+    var dv    = panel ? panel.dataset : {};
+
+    // Valeurs initiales injectées par PHP
+    setPower(dv.vPower || 0);
+    if (dv.vSetpoint)           setSetpoint(dv.vSetpoint);
+    if (dv.vMode)               setMode(dv.vMode);
+    if (dv.vFanspeed)           setFanSpeed(dv.vFanspeed);
+    if (dv.vDisplay !== undefined && dv.vDisplay !== '') setDisplay(dv.vDisplay);
+
+    if (!C.fanspeed) {
+      var fanSect = el('fan-section');
+      if (fanSect) fanSect.style.display = 'none';
+    }
+
+    var intEl = el('int-temp');
+    var extEl = el('ext-temp');
+
+    if (C.intTemp && intEl) {
+      if (dv.vIntTemp) intEl.querySelector('.aw-sensor-val').textContent = dv.vIntTemp;
+    } else if (intEl) {
+      intEl.style.display = 'none';
+    }
+
+    if (C.extTemp && extEl) {
+      if (dv.vExtTemp) extEl.querySelector('.aw-sensor-val').textContent = dv.vExtTemp;
+    } else if (extEl) {
+      extEl.style.display = 'none';
+    }
+
+    if (!C.intTemp && !C.extTemp) {
+      var sensorsSect = el('sensors-section');
+      if (sensorsSect) sensorsSect.style.display = 'none';
+    }
+
+    if (C.swingV) {
+      var swingSel = el('swing-sel');
+      if (swingSel && dv.vSwing !== undefined) swingSel.value = dv.vSwing;
+      jeedom.cmd.addUpdateFunction(C.swingV, function (r) {
+        var sel = el('swing-sel');
+        if (sel) sel.value = r.value;
+      });
+    } else {
+      var swingSect = el('swing-section');
+      if (swingSect) swingSect.style.display = 'none';
+    }
+
+    if (!C.display) {
+      var dispBtn = el('display-btn');
+      if (dispBtn) dispBtn.style.display = 'none';
+    } else {
+      jeedom.cmd.addUpdateFunction(C.display, function (r) { setDisplay(r.value); });
+    }
+
+    // Mises à jour en temps réel
+    if (C.power)    jeedom.cmd.addUpdateFunction(C.power,    function (r) { setPower(r.value); });
+    if (C.setpoint) jeedom.cmd.addUpdateFunction(C.setpoint, function (r) { setSetpoint(r.value); });
+    if (C.mode)     jeedom.cmd.addUpdateFunction(C.mode,     function (r) { setMode(r.value); });
+    if (C.fanspeed) jeedom.cmd.addUpdateFunction(C.fanspeed, function (r) { setFanSpeed(r.value); });
+    if (C.intTemp)  jeedom.cmd.addUpdateFunction(C.intTemp,  function (r) {
+      var s = el('int-temp');
+      if (s) s.querySelector('.aw-sensor-val').textContent = r.value;
+    });
+    if (C.extTemp)  jeedom.cmd.addUpdateFunction(C.extTemp,  function (r) {
+      var s = el('ext-temp');
+      if (s) s.querySelector('.aw-sensor-val').textContent = r.value;
+    });
+
+    // Bouton ON/OFF
+    var powerBtn = el('power-btn');
+    if (powerBtn) {
+      powerBtn.addEventListener('click', function () {
+        exec(powerOn ? C.turnOff : C.turnOn);
+      });
+    }
+
+    // Slider consigne (debounce 500 ms)
+    var setpointSlider = el('setpoint-slider');
+    if (setpointSlider && C.setTemp) {
+      setpointSlider.addEventListener('input', function () {
+        var v = this.value;
+        var lbl = el('setpoint-lbl');
+        if (lbl) lbl.textContent = v;
+        clearTimeout(debTemp);
+        debTemp = setTimeout(function () { exec(C.setTemp, { slider: parseInt(v) }); }, 500);
+      });
+    }
+
+    // Select mode
+    var modeSel = el('mode-sel');
+    if (modeSel && C.setMode) {
+      modeSel.addEventListener('change', function () {
+        exec(C.setMode, { select: this.value });
+      });
+    }
+
+    // Slider ventilateur (debounce 500 ms)
+    var fanSlider = el('fan-slider');
+    if (fanSlider && C.setFan) {
+      fanSlider.addEventListener('input', function () {
+        var v = this.value;
+        var lbl = el('fan-lbl');
+        if (lbl) lbl.textContent = parseInt(v) === 0 ? 'Auto' : v;
+        clearTimeout(debFan);
+        debFan = setTimeout(function () { exec(C.setFan, { slider: parseInt(v) }); }, 500);
+      });
+    }
+
+    // Select orientation verticale
+    var swingSel = el('swing-sel');
+    if (swingSel && C.setSwingV) {
+      swingSel.addEventListener('change', function () {
+        exec(C.setSwingV, { select: this.value });
+      });
+    }
+
+    // Bouton affichage LED
+    var displayBtn = el('display-btn');
+    if (displayBtn && C.setDisplay) {
+      displayBtn.addEventListener('click', function () {
+        exec(C.setDisplay, { select: displayOn ? '0' : '1' });
+      });
+    }
+  }
+
+  jQuery(function () { init(); });
+})();
+</script>
