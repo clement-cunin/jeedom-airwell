@@ -39,8 +39,11 @@ $eqlogics = eqLogic::byType('airwell');
             <a class="btn btn-default btn-sm eqLogicAction" data-action="copy">
                 <i class="fas fa-copy"></i> {{Dupliquer}}
             </a>
-            <a class="btn btn-sm btn-success eqLogicAction roundedRight" data-action="save">
+            <a class="btn btn-sm btn-success eqLogicAction" data-action="save">
                 <i class="fas fa-check-circle"></i> {{Sauvegarder}}
+            </a>
+            <a class="btn btn-danger btn-sm eqLogicAction roundedRight" data-action="remove">
+                <i class="fas fa-minus-circle"></i> {{Supprimer}}
             </a>
         </div>
         <ul class="nav nav-tabs" role="tablist">
