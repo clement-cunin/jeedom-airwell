@@ -67,7 +67,12 @@ $eqlogics = eqLogic::byType('airwell');
                         <div class="form-group">
                             <label class="col-sm-3 control-label">{{Objet parent}}</label>
                             <div class="col-sm-3">
-                                <?php echo jeeObject::buildSelectForm(); ?>
+                                <select class="eqLogicAttr form-control" data-l1key="object_id">
+                                    <option value="">{{Aucun}}</option>
+                                    <?php foreach (jeeObject::all() as $_object) { ?>
+                                        <option value="<?php echo $_object->getId(); ?>"><?php echo $_object->getHumanName(); ?></option>
+                                    <?php } ?>
+                                </select>
                             </div>
                         </div>
                         <div class="form-group">
