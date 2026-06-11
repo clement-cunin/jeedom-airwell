@@ -13,6 +13,12 @@
       box-sizing: border-box;
       font-family: inherit;
       color: inherit;
+      background-color: rgba(var(--eq-bg-color), var(--opacity));
+      box-shadow: 0 4px 2px -2px rgba(0,0,0,0.15);
+      transition: box-shadow 0.4s cubic-bezier(.25,.8,.25,1);
+    }
+    #airwell-#eqLogic_id#:hover {
+      box-shadow: 0 8px 22px rgba(0,0,0,0.25);
     }
     #airwell-#eqLogic_id# .aw-header {
       display: flex;
@@ -21,8 +27,7 @@
       margin: -8px -8px 10px -8px;
       padding: 0 10px;
       height: 24px;
-      background-color: red;
-      box-shadow: 0 3px 10px 0 rgba(0,0,0,0.2);
+      background-color: rgba(var(--cat-other-color), var(--opacity));
     }
     #airwell-#eqLogic_id# .aw-name {
       font-size: 0.95em;
