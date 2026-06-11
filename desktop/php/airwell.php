@@ -33,7 +33,7 @@ $eqlogics = eqLogic::byType('airwell');
         </div>
         <div class="eqLogicThumbnailContainer" style="padding-bottom:10px;">
             <?php foreach ($eqlogics as $eqLogic) { ?>
-                <div class="eqLogicDisplayCard cursor<?php echo ($eqLogic->getIsEnable()) ? '' : ' eqLogic-disabled'; ?>" data-eqLogic_id="<?php echo $eqLogic->getId(); ?>">
+                <div class="eqLogicDisplayCard cursor" data-eqLogic_id="<?php echo $eqLogic->getId(); ?>" style="<?php echo ($eqLogic->getIsEnable()) ? '' : 'opacity:0.4;'; ?>">
                     <img src="<?php echo $eqLogic->getImage(); ?>" />
                     <br>
                     <span class="name"><?php echo $eqLogic->getHumanName(true, true); ?></span>
@@ -159,6 +159,3 @@ $eqlogics = eqLogic::byType('airwell');
 
 <?php include_file('desktop', 'airwell', 'js', 'airwell'); ?>
 <?php include_file('core', 'plugin.template', 'js'); ?>
-<style>
-.eqLogicDisplayCard.eqLogic-disabled { opacity: 0.4; }
-</style>
