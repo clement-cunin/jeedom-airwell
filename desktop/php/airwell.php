@@ -31,7 +31,7 @@ $eqlogics = eqLogic::byType('airwell');
                 <a class="btn btn-default btn-sm bt_resetFilter" title="{{Réinitialiser la recherche}}"><i class="fas fa-times"></i></a>
             </div>
         </div>
-        <div class="eqLogicThumbnailContainer">
+        <div class="eqLogicThumbnailContainer" style="padding-bottom:10px;">
             <?php foreach ($eqlogics as $eqLogic) { ?>
                 <div class="eqLogicDisplayCard cursor" data-eqLogic_id="<?php echo $eqLogic->getId(); ?>">
                     <img src="<?php echo $eqLogic->getImage(); ?>" />
