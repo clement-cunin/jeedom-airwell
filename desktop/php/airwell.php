@@ -24,8 +24,13 @@ $eqlogics = eqLogic::byType('airwell');
                 <span>{{Import automatique}}</span>
             </div>
         </div>
-        <hr>
         <legend><i class="fas fa-snowflake"></i> {{Mes équipements}}</legend>
+        <div class="input-group" style="margin-bottom:5px;">
+            <input class="filter form-control input-sm" placeholder="{{Rechercher}}" type="text" />
+            <div class="input-group-btn">
+                <a class="btn btn-default btn-sm bt_resetFilter" title="{{Réinitialiser la recherche}}"><i class="fas fa-times"></i></a>
+            </div>
+        </div>
         <div class="eqLogicThumbnailContainer">
             <?php foreach ($eqlogics as $eqLogic) { ?>
                 <div class="eqLogicDisplayCard cursor" data-eqLogic_id="<?php echo $eqLogic->getId(); ?>">
