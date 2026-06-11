@@ -10,7 +10,7 @@ $eqlogics = eqLogic::byType('airwell');
 
 <div class="row row-overflow">
     <!-- Sidebar: equipment list -->
-    <div class="col-xs-12 col-sm-3 eqLogicThumbnailDisplay">
+    <div class="col-xs-12 eqLogicThumbnailDisplay">
         <legend><i class="fas fa-cog"></i> {{Gestion}}</legend>
         <div class="eqLogicThumbnailContainer">
             <div class="cursor eqLogicAction logNewGetInfo" data-action="add">
@@ -33,7 +33,7 @@ $eqlogics = eqLogic::byType('airwell');
         </div>
         <div class="eqLogicThumbnailContainer" style="padding-bottom:10px;">
             <?php foreach ($eqlogics as $eqLogic) { ?>
-                <div class="eqLogicDisplayCard cursor" data-eqLogic_id="<?php echo $eqLogic->getId(); ?>" style="<?php echo ($eqLogic->getIsEnable()) ? '' : 'opacity:0.4;'; ?>">
+                <div class="eqLogicDisplayCard cursor<?php echo ($eqLogic->getIsEnable()) ? '' : ' disableCard'; ?>" data-eqLogic_id="<?php echo $eqLogic->getId(); ?>">
                     <img src="<?php echo $eqLogic->getImage(); ?>" />
                     <br>
                     <span class="name"><?php echo $eqLogic->getHumanName(true, true); ?></span>
@@ -43,7 +43,7 @@ $eqlogics = eqLogic::byType('airwell');
     </div>
 
     <!-- Main panel: equipment form -->
-    <div class="col-xs-12 col-sm-9 eqLogic" style="display: none;">
+    <div class="col-xs-12 eqLogic" style="display: none;">
         <div class="input-group pull-right" style="display:inline-flex">
             <a class="btn btn-default btn-sm eqLogicAction roundedLeft" data-action="returnToThumbnailDisplay">
                 <i class="fas fa-arrow-left"></i> {{Retour}}
