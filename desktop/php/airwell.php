@@ -24,6 +24,7 @@ $eqlogics = eqLogic::byType('airwell');
                 <span>{{Import automatique}}</span>
             </div>
         </div>
+        <hr>
         <legend><i class="fas fa-snowflake"></i> {{Mes équipements}}</legend>
         <div class="eqLogicThumbnailContainer">
             <?php foreach ($eqlogics as $eqLogic) { ?>
