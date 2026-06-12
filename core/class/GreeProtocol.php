@@ -138,7 +138,7 @@ class GreeProtocol {
     /**
      * Discover devices via UDP broadcast.
      *
-     * @return array[] Each item: ['ip', 'mac', 'name', 'ver', 'brand']
+     * @return array[] Each item: ['ip', 'mac', 'name', 'ver', 'brand', 'modelType', 'hid']
      */
     public static function discover(string $broadcastIp = '192.168.1.255', int $timeout = 3): array {
         $responses = self::udpBroadcast($broadcastIp, json_encode(['t' => 'scan']), $timeout);
@@ -153,11 +153,13 @@ class GreeProtocol {
             if (($pack['t'] ?? '') !== 'dev') continue;
 
             $devices[] = [
-                'ip'    => $r['ip'],
-                'mac'   => $pack['mac']   ?? $pack['cid'] ?? '',
-                'name'  => $pack['name']  ?? '',
-                'ver'   => $pack['ver']   ?? '',
-                'brand' => $pack['brand'] ?? '',
+                'ip'        => $r['ip'],
+                'mac'       => $pack['mac']       ?? $pack['cid'] ?? '',
+                'name'      => $pack['name']      ?? '',
+                'ver'       => $pack['ver']        ?? '',
+                'brand'     => $pack['brand']      ?? '',
+                'modelType' => $pack['ModelType']  ?? '',
+                'hid'       => $pack['hid']        ?? '',
             ];
         }
         return $devices;

@@ -140,7 +140,7 @@ function importDevice(device, btn, onDone) {
     return $.ajax({
         type: "POST",
         url: "plugins/airwell/core/ajax/airwell.ajax.php",
-        data: { action: "importDevice", ip: device.ip, mac: device.mac, name: name },
+        data: { action: "importDevice", ip: device.ip, mac: device.mac, name: name, modelType: device.modelType || '', hid: device.hid || '' },
         dataType: "json",
         success: (data) => {
             if (data.state !== "ok") {

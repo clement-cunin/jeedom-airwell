@@ -8,5 +8,6 @@
     "category": "wellness",
     "changelog": "docs/fr_FR/changelog.md",
     "documentation": "docs/fr_FR/index.md",
-    "issue": "https://github.com/clement-cunin/jeedom-airwell/issues"
+    "issue": "https://github.com/clement-cunin/jeedom-airwell/issues",
+    "compatibility": ["miniplus", "smart", "pro", "luna", "docker", "rpi"]
 }

@@ -46,9 +46,11 @@ try {
             break;
 
         case 'importDevice':
-            $ip   = init('ip');
-            $mac  = init('mac');
-            $name = init('name') ?: ('Airwell ' . strtoupper($mac));
+            $ip        = init('ip');
+            $mac       = init('mac');
+            $name      = init('name') ?: ('Airwell ' . strtoupper($mac));
+            $modelType = init('modelType', '');
+            $hid       = init('hid', '');
             if (!$ip || !$mac) {
                 throw new Exception('IP et MAC requis');
             }
@@ -59,6 +61,8 @@ try {
             $eq->setIsVisible(1);
             $eq->setConfiguration('ip', $ip);
             $eq->setConfiguration('mac', $mac);
+            if ($modelType !== '') $eq->setConfiguration('modelType', $modelType);
+            if ($hid !== '')       $eq->setConfiguration('hid', $hid);
             $eq->save();
             $bindOk = false;
             try {
