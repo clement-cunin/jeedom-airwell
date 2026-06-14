@@ -2,7 +2,7 @@
 
 Plugin Jeedom pour le pilotage des climatiseurs Airwell via le protocole Gree (WiFi local, sans cloud).
 
-![Widget Airwell](../widget.png)
+<img src="../widget.png" alt="Widget Airwell" width="300" />
 
 ## Prérequis
 
