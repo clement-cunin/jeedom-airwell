@@ -205,9 +205,22 @@ class airwell extends eqLogic {
             $sleepMode->setName(__('Mode sleep', __FILE__));
         }
         $sleepMode->setType('info');
-        $sleepMode->setSubType('numeric');
+        $sleepMode->setSubType('binary');
         $sleepMode->setEqLogic_id($this->getId());
         $sleepMode->save();
+
+        $cmdSetSleepMode = $this->getCmd('action', 'set_sleep_mode');
+        if (!is_object($cmdSetSleepMode)) {
+            $cmdSetSleepMode = new airwellCmd();
+            $cmdSetSleepMode->setLogicalId('set_sleep_mode');
+            $cmdSetSleepMode->setIsVisible(1);
+            $cmdSetSleepMode->setName(__('Mode nuit', __FILE__));
+        }
+        $cmdSetSleepMode->setType('action');
+        $cmdSetSleepMode->setSubType('select');
+        $cmdSetSleepMode->setConfiguration('listValue', '1|Activé;0|Désactivé');
+        $cmdSetSleepMode->setEqLogic_id($this->getId());
+        $cmdSetSleepMode->save();
 
         $antiDirectBlow = $this->getCmd('info', 'anti_direct_blow');
         if (!is_object($antiDirectBlow)) {
@@ -332,6 +345,9 @@ class airwellCmd extends cmd {
                 break;
             case 'set_swing_v':
                 $params = ['SwUpDn' => (int)($_options['select'] ?? 0)];
+                break;
+            case 'set_sleep_mode':
+                $params = ['SlpMod' => (int)($_options['select'] ?? 0)];
                 break;
             default:
                 throw new Exception("Commande inconnue: " . $this->getLogicalId());
