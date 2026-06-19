@@ -356,5 +356,7 @@ class airwellCmd extends cmd {
         if (!GreeProtocol::sendCommand($ip, $mac, $key, $params, $cipher)) {
             throw new Exception("Airwell [{$eqLogic->getName()}]: commande refusée par le device");
         }
+        usleep(500000);
+        $eqLogic->refreshStatus();
     }
 }
