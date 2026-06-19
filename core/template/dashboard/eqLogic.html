@@ -5,6 +5,7 @@
      data-v-fanspeed="#cmd_value_fanspeed#"
      data-v-swing="#cmd_value_swing_v#"
      data-v-display="#cmd_value_display#"
+     data-v-sleep="#cmd_value_sleep_mode#"
      data-v-int-temp="#cmd_value_internal_temp#"
      data-v-ext-temp="#cmd_value_outdoor_temp#">
   <style>
@@ -43,7 +44,8 @@
       flex-shrink: 0;
     }
     #airwell-#eqLogic_id# .aw-btn-power,
-    #airwell-#eqLogic_id# .aw-btn-display {
+    #airwell-#eqLogic_id# .aw-btn-display,
+    #airwell-#eqLogic_id# .aw-btn-sleep {
       width: 20px;
       height: 20px;
       border-radius: 50%;
@@ -62,6 +64,9 @@
     }
     #airwell-#eqLogic_id# .aw-btn-display.aw-active {
       background: #f39c12;
+    }
+    #airwell-#eqLogic_id# .aw-btn-sleep.aw-active {
+      background: #9b59b6;
     }
     #airwell-#eqLogic_id# .aw-section {
       margin-bottom: 8px;
@@ -156,6 +161,7 @@
   <div class="aw-header">
     <span class="aw-name">#name#</span>
     <div class="aw-header-btns">
+      <button class="aw-btn-sleep" id="aw-sleep-btn-#eqLogic_id#" title="Mode nuit">🌙</button>
       <button class="aw-btn-display" id="aw-display-btn-#eqLogic_id#" title="Affichage LED">☀</button>
       <button class="aw-btn-power" id="aw-power-btn-#eqLogic_id#" title="Allumer/Éteindre">⏻</button>
     </div>
@@ -240,13 +246,16 @@
     setTemp:  parseInt('#cmd_id_set_temperature#') || 0,
     setMode:  parseInt('#cmd_id_set_mode#')        || 0,
     setFan:      parseInt('#cmd_id_set_fanspeed#')    || 0,
-    display:     parseInt('#cmd_id_display#')         || 0,
-    setDisplay:  parseInt('#cmd_id_set_display#')     || 0,
-    swingV:      parseInt('#cmd_id_swing_v#')         || 0,
-    setSwingV:   parseInt('#cmd_id_set_swing_v#')     || 0,
+    display:      parseInt('#cmd_id_display#')          || 0,
+    setDisplay:   parseInt('#cmd_id_set_display#')      || 0,
+    swingV:       parseInt('#cmd_id_swing_v#')          || 0,
+    setSwingV:    parseInt('#cmd_id_set_swing_v#')      || 0,
+    sleepMode:    parseInt('#cmd_id_sleep_mode#')       || 0,
+    setSleepMode: parseInt('#cmd_id_set_sleep_mode#')   || 0,
   };
 
   var powerOn  = 0;
+  var sleepOn  = 0;
   var debTemp  = null;
   var debFan   = null;
 
@@ -296,6 +305,14 @@
     btn.title = displayOn ? 'Affichage LED allumé' : 'Affichage LED éteint';
   }
 
+  function setSleepMode(v) {
+    sleepOn = parseInt(v);
+    var btn = el('sleep-btn');
+    if (!btn) return;
+    btn.classList.toggle('aw-active', sleepOn === 1);
+    btn.title = sleepOn ? 'Mode nuit activé' : 'Mode nuit désactivé';
+  }
+
   function init() {
     var panel = document.getElementById('airwell-' + eqId);
     var dv    = panel ? panel.dataset : {};
@@ -306,6 +323,7 @@
     if (dv.vMode)               setMode(dv.vMode);
     if (dv.vFanspeed)           setFanSpeed(dv.vFanspeed);
     if (dv.vDisplay !== undefined && dv.vDisplay !== '') setDisplay(dv.vDisplay);
+    if (dv.vSleep !== undefined && dv.vSleep !== '') setSleepMode(dv.vSleep);
 
     if (!C.fanspeed) {
       var fanSect = el('fan-section');
@@ -349,6 +367,13 @@
       if (dispBtn) dispBtn.style.display = 'none';
     } else {
       jeedom.cmd.addUpdateFunction(C.display, function (r) { setDisplay(r.value); });
+    }
+
+    if (!C.sleepMode) {
+      var sleepBtn = el('sleep-btn');
+      if (sleepBtn) sleepBtn.style.display = 'none';
+    } else {
+      jeedom.cmd.addUpdateFunction(C.sleepMode, function (r) { setSleepMode(r.value); });
     }
 
     // Mises à jour en temps réel
@@ -418,6 +443,14 @@
     if (displayBtn && C.setDisplay) {
       displayBtn.addEventListener('click', function () {
         exec(C.setDisplay, { select: displayOn ? '0' : '1' });
+      });
+    }
+
+    // Bouton mode nuit
+    var sleepBtn = el('sleep-btn');
+    if (sleepBtn && C.setSleepMode) {
+      sleepBtn.addEventListener('click', function () {
+        exec(C.setSleepMode, { select: sleepOn ? '0' : '1' });
       });
     }
   }
