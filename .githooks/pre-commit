@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# Pre-commit hook: lint staged PHP files before allowing a commit.
+#
+# Runs `php -l` on every staged .php file and blocks the commit (exit 1) if
+# any file fails to compile. This guards against fatal PHP errors (e.g. a
+# redefined class constant) making it into git history, which previously
+# crashed a downstream server that loaded this plugin's code at runtime.
+#
+# Activation: git config core.hooksPath .githooks
+
+staged_php_files=$(git diff --cached --name-only --diff-filter=ACM -- '*.php')
+
+if [ -z "$staged_php_files" ]; then
+    exit 0
+fi
+
+status=0
+
+echo "Running php -l on staged PHP files..."
+
+for file in $staged_php_files; do
+    # Skip files deleted since being staged (e.g. staged then removed again).
+    [ -f "$file" ] || continue
+
+    if ! output=$(php -l "$file" 2>&1); then
+        echo "$output"
+        status=1
+    fi
+done
+
+if [ $status -ne 0 ]; then
+    echo ""
+    echo "pre-commit: PHP syntax check failed, commit aborted."
+    echo "Fix the error(s) above and try again."
+fi
+
+exit $status
