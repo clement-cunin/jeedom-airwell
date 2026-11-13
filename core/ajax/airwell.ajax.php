@@ -36,11 +36,11 @@ try {
             foreach (eqLogic::byType('airwell') as $eq) {
                 $mac = $eq->getConfiguration('mac');
                 if ($mac) {
-                    $configuredMacs[] = strtolower($mac);
+                    $configuredMacs[] = GreeProtocol::normalizeMac($mac);
                 }
             }
             $devices = array_values(array_filter($devices, function ($d) use ($configuredMacs) {
-                return !in_array(strtolower($d['mac']), $configuredMacs);
+                return !in_array(GreeProtocol::normalizeMac($d['mac']), $configuredMacs);
             }));
             ajax::success($devices);
             break;

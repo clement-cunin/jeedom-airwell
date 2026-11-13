@@ -120,7 +120,7 @@ $eqlogics = eqLogic::byType('airwell');
                         <div class="form-group">
                             <label class="col-sm-3 control-label">{{Adresse MAC}}</label>
                             <div class="col-sm-3">
-                                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="mac" placeholder="AA:BB:CC:DD:EE:FF" />
+                                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="mac" placeholder="7C:B8:E6:25:1C:43" title="{{Tous les formats sont acceptés (AA:BB:CC:DD:EE:FF, aa-bb-cc-dd-ee-ff, aabbccddeeff)}}" />
                             </div>
                         </div>
                         <div class="form-group">

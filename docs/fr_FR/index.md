@@ -19,9 +19,9 @@ Installer le plugin depuis le Market Jeedom, puis l'activer.
 
 1. Aller dans **Plugins > Confort > Airwell**
 2. Cliquer sur **Ajouter**
-3. Renseigner l'adresse IP et MAC du climatiseur
-4. Cliquer sur l'icône de binding pour établir la connexion
-5. Sauvegarder
+3. Renseigner l'adresse IP et MAC du climatiseur (tous les formats de MAC sont acceptés : `7C:B8:E6:25:1C:43`, `7c-b8-e6-25-1c-43`, `7cb8e6251c43`…)
+4. Sauvegarder
+5. Cliquer sur l'icône de binding pour établir la connexion
 
 ## Que faire si mes équipements ne sont pas trouvés ?
 
@@ -55,7 +55,7 @@ Si le scan ne fonctionne toujours pas, vous pouvez ajouter l'équipement à la m
 
 1. Relevez l'adresse IP et l'adresse MAC du climatiseur depuis votre box/routeur.
 2. Cliquez sur **Ajouter** dans Jeedom.
-3. Renseignez l'IP et la MAC, puis cliquez sur l'icône de binding pour établir la connexion.
+3. Renseignez l'IP et la MAC, sauvegardez, puis cliquez sur l'icône de binding pour établir la connexion.
 
 ## Commandes disponibles
 

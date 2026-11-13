@@ -67,6 +67,17 @@ class airwell extends eqLogic {
         }
     }
 
+    public function preSave() {
+        $mac = trim((string)$this->getConfiguration('mac'));
+        if ($mac === '') {
+            return;
+        }
+        if (!GreeProtocol::isValidMac($mac)) {
+            throw new Exception(__('Adresse MAC invalide', __FILE__) . " : $mac (" . __('12 caractères hexadécimaux attendus, ex. 7C:B8:E6:25:1C:43', __FILE__) . ')');
+        }
+        $this->setConfiguration('mac', GreeProtocol::normalizeMac($mac));
+    }
+
     public function postSave() {
         $power = $this->getCmd('info', 'power');
         if (!is_object($power)) {

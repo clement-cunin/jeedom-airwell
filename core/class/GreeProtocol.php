@@ -15,6 +15,20 @@ class GreeProtocol {
     const MODES     = ['auto' => 0, 'cool' => 1, 'dry' => 2, 'fan_only' => 3, 'heat' => 4];
     const MODES_INV = [0 => 'auto', 1 => 'cool', 2 => 'dry', 3 => 'fan_only', 4 => 'heat'];
 
+    // ---- MAC address ----------------------------------------------------
+
+    /**
+     * Normalize a MAC address to the format expected by the device:
+     * 12 lowercase hex chars, no separator (e.g. "7C:B8:E6:25:1C:43" → "7cb8e6251c43").
+     */
+    public static function normalizeMac(string $mac): string {
+        return strtolower(preg_replace('/[\s:.\-]/', '', $mac));
+    }
+
+    public static function isValidMac(string $mac): bool {
+        return preg_match('/^[0-9a-f]{12}$/', self::normalizeMac($mac)) === 1;
+    }
+
     // ---- Crypto V1 (AES-128-ECB) ----------------------------------------
 
     public static function encryptV1(array $data, string $key): array {
@@ -172,6 +186,8 @@ class GreeProtocol {
      * @throws RuntimeException on failure
      */
     public static function bind(string $ip, string $mac): array {
+        $mac = self::normalizeMac($mac);
+
         // Try V1 first
         try {
             return self::bindWithCipher($ip, $mac, 'v1');
@@ -220,6 +236,7 @@ class GreeProtocol {
             'OutEnvTem', 'DwatSen', 'SlpMod', 'AntiDirectBlow',
         ];
 
+        $mac       = self::normalizeMac($mac);
         $payload   = ['mac' => $mac, 't' => 'status', 'cols' => $cols];
         $encrypted = $cipher === 'v2' ? self::encryptV2($payload, $key) : self::encryptV1($payload, $key);
         $request   = self::buildEnvelope($encrypted, $mac, 0);
@@ -241,6 +258,7 @@ class GreeProtocol {
      * @param string $cipher 'v1' or 'v2'
      */
     public static function sendCommand(string $ip, string $mac, string $key, array $params, string $cipher = 'v1'): bool {
+        $mac       = self::normalizeMac($mac);
         $payload   = ['opt' => array_keys($params), 'p' => array_values($params), 't' => 'cmd'];
         $encrypted = $cipher === 'v2' ? self::encryptV2($payload, $key) : self::encryptV1($payload, $key);
         $request   = self::buildEnvelope($encrypted, $mac, 0);

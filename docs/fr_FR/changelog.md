@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-13
+
+- Correction : l'adresse MAC saisie à la main est désormais normalisée (`7C:B8:E6:25:1C:43` → `7cb8e6251c43`), au format attendu par le climatiseur. Avant, une MAC avec séparateurs ou en majuscules faisait échouer le binding avec « GreeProtocol: no response ».
+- Une adresse MAC invalide est refusée à la sauvegarde avec un message explicite.
+- Les équipements existants sont corrigés automatiquement lors de la mise à jour du plugin.
+- Documentation : sauvegarder l'équipement avant de lancer le binding.
+
 ## 1.0.0
 
 - Première publication sur le Market Jeedom
