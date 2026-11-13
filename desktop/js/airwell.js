@@ -25,7 +25,153 @@ $(() => {
     });
 
     $("#bt_scanDevices").off("click").on("click", openScanModal);
+    $("#bt_diagnoseDevice").off("click").on("click", openDiagnosticModal);
 });
+
+// ── Diagnostic modal ──────────────────────────────────────────────────────────
+
+const DIAG_STATUS = {
+    ok:          { icon: "fas fa-check-circle text-success",        text: "✅" },
+    warning:     { icon: "fas fa-exclamation-triangle text-warning", text: "⚠️" },
+    error:       { icon: "fas fa-times-circle text-danger",          text: "❌" },
+    unavailable: { icon: "fas fa-minus-circle text-muted",           text: "➖" },
+};
+
+function openDiagnosticModal() {
+    const eqLogicId = $(".eqLogicAttr[data-l1key='id']").val();
+    if (!eqLogicId) {
+        $.fn.showAlert({ message: "{{Sauvegardez d'abord l'équipement}}", level: "warning" });
+        return;
+    }
+    if ($("#modal_airwellDiagnostic").length === 0) {
+        $("body").append('<div id="modal_airwellDiagnostic" style="display:none;"><div id="div_diagnosticResult"></div></div>');
+    }
+
+    let report = "";
+    $("#modal_airwellDiagnostic").dialog({
+        title: "{{Diagnostic de la connexion}}",
+        width: 640,
+        maxHeight: 700,
+        modal: true,
+        buttons: [
+            {
+                text: "{{Copier le rapport}}",
+                id: "bt_diagnosticCopy",
+                class: "btn btn-default",
+                click: () => copyText(report),
+            },
+            {
+                text: "{{Relancer}}",
+                id: "bt_diagnosticRerun",
+                class: "btn btn-default",
+                click: () => run(),
+            },
+            {
+                text: "{{Fermer}}",
+                class: "btn btn-default",
+                click: function () { $(this).dialog("close"); },
+            },
+        ],
+        open: () => run(),
+    });
+
+    function run() {
+        const result = $("#div_diagnosticResult");
+        $("#bt_diagnosticCopy, #bt_diagnosticRerun").prop("disabled", true);
+        result.html("<p><i class=\"fas fa-spinner fa-spin\"></i> {{Diagnostic en cours… (jusqu'à 30 secondes)}}</p>");
+
+        $.ajax({
+            type: "POST",
+            url: "plugins/airwell/core/ajax/airwell.ajax.php",
+            data: { action: "diagnose", id: eqLogicId },
+            dataType: "json",
+            timeout: 120000,
+            success: (data) => {
+                $("#bt_diagnosticRerun").prop("disabled", false);
+                if (data.state !== "ok") {
+                    result.html($('<p class="text-danger">').text(data.result));
+                    return;
+                }
+                report = buildDiagnosticReport(data.result);
+                renderDiagnostic(result, data.result);
+                $("#bt_diagnosticCopy").prop("disabled", false);
+            },
+            error: (_req, _status, error) => {
+                $("#bt_diagnosticRerun").prop("disabled", false);
+                result.html($('<p class="text-danger">').text(error));
+            },
+        });
+    }
+}
+
+function renderDiagnostic(container, res) {
+    container.empty();
+    res.steps.forEach((s) => {
+        const status = DIAG_STATUS[s.status] || DIAG_STATUS.unavailable;
+        const block = $('<div style="margin-bottom:10px;">')
+            .append($("<i>").addClass(status.icon).css("margin-right", "6px"))
+            .append($("<strong>").text(s.step))
+            .append($("<div>").text(s.message));
+        if (s.details) {
+            block.append($('<small class="text-muted" style="white-space:pre-line;">').text(s.details));
+        }
+        container.append(block);
+    });
+
+    const conclusion = $('<div class="alert alert-info" style="margin-top:10px;">')
+        .append($("<strong>").text("{{Conclusion}} : "))
+        .append($("<span>").text(res.conclusion));
+
+    if (res.suggestedIp) {
+        conclusion.append("<br>").append(suggestionButton("{{Utiliser l'IP}} " + res.suggestedIp, "ip", res.suggestedIp));
+    }
+    if (res.suggestedMac) {
+        conclusion.append("<br>").append(suggestionButton("{{Utiliser la MAC}} " + res.suggestedMac, "mac", res.suggestedMac));
+    }
+    container.append(conclusion);
+}
+
+function suggestionButton(label, field, value) {
+    return $('<button class="btn btn-xs btn-warning" style="margin-top:6px;">')
+        .text(label)
+        .on("click", function () {
+            $(".eqLogicAttr[data-l1key='configuration'][data-l2key='" + field + "']").val(value);
+            $(this).prop("disabled", true);
+            $.fn.showAlert({ message: "{{Valeur reportée dans l'équipement : sauvegardez puis relancez le binding}}", level: "warning" });
+        });
+}
+
+function buildDiagnosticReport(res) {
+    const lines = [
+        "Diagnostic Airwell — " + new Date().toLocaleString(),
+        "IP : " + res.ip + " · MAC : " + res.mac,
+        "",
+    ];
+    res.steps.forEach((s) => {
+        const status = DIAG_STATUS[s.status] || DIAG_STATUS.unavailable;
+        lines.push(status.text + " " + s.step);
+        lines.push("   " + s.message);
+        if (s.details) {
+            s.details.split("\n").forEach((d) => lines.push("   " + d));
+        }
+    });
+    lines.push("", "{{Conclusion}} : " + res.conclusion);
+    return lines.join("\n");
+}
+
+function copyText(text) {
+    const done = () => $.fn.showAlert({ message: "{{Rapport copié dans le presse-papier}}", level: "success" });
+    // navigator.clipboard only exists on HTTPS/localhost: Jeedom is often served over plain HTTP
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done);
+        return;
+    }
+    const area = $("<textarea>").val(text).css({ position: "fixed", top: 0, left: 0, opacity: 0 }).appendTo("body");
+    area[0].select();
+    document.execCommand("copy");
+    area.remove();
+    done();
+}
 
 // ── Scan modal ────────────────────────────────────────────────────────────────
 

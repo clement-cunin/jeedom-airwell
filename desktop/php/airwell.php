@@ -128,9 +128,12 @@ $eqlogics = eqLogic::byType('airwell');
                             <div class="col-sm-3">
                                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="device_key" placeholder="{{Obtenue lors du binding}}" readonly />
                             </div>
-                            <div class="col-sm-1">
+                            <div class="col-sm-3">
                                 <a class="btn btn-default btn-sm" id="bt_bindDevice" title="{{Lancer le binding}}">
                                     <i class="fas fa-link"></i>
+                                </a>
+                                <a class="btn btn-default btn-sm" id="bt_diagnoseDevice" title="{{Diagnostiquer la connexion au climatiseur}}">
+                                    <i class="fas fa-stethoscope"></i> {{Diagnostic}}
                                 </a>
                             </div>
                         </div>

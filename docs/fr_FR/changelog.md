@@ -2,6 +2,7 @@
 
 ## 2026-11-13
 
+- Nouveau bouton **Diagnostic** sur l'équipement : teste le sous-réseau, la présence de l'appareil (ping / ARP), la réponse au protocole Gree en direct, la découverte par broadcast et la clé. Il conclut sur la cause la plus probable, propose de corriger l'IP ou la MAC, et permet de copier le rapport.
 - Correction : l'adresse MAC saisie à la main est désormais normalisée (`7C:B8:E6:25:1C:43` → `7cb8e6251c43`), au format attendu par le climatiseur. Avant, une MAC avec séparateurs ou en majuscules faisait échouer le binding avec « GreeProtocol: no response ».
 - Une adresse MAC invalide est refusée à la sauvegarde avec un message explicite.
 - Les équipements existants sont corrigés automatiquement lors de la mise à jour du plugin.
