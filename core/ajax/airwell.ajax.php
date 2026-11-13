@@ -2,6 +2,7 @@
 try {
     require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
     require_once dirname(__FILE__) . '/../class/GreeProtocol.php';
+    require_once dirname(__FILE__) . '/../class/AirwellDiagnostic.php';
     include_file('core', 'authentification', 'php');
     if (!isConnect('admin')) {
         throw new Exception('401 Unauthorized');
@@ -26,6 +27,33 @@ try {
             $eqLogic->setConfiguration('device_key', $result['key']);
             $eqLogic->setConfiguration('cipher', $result['cipher']);
             $eqLogic->save();
+            ajax::success($result);
+            break;
+
+        case 'diagnose':
+            $eqLogic = airwell::byId(init('id'));
+            if (!is_object($eqLogic)) {
+                throw new Exception('Unknown equipment: ' . init('id'));
+            }
+            $ip  = (string)$eqLogic->getConfiguration('ip');
+            $mac = (string)$eqLogic->getConfiguration('mac');
+            if (!$ip || !$mac) {
+                throw new Exception('Renseignez l\'IP et la MAC avant de lancer le diagnostic');
+            }
+            set_time_limit(90);
+            $result = AirwellDiagnostic::run(
+                $ip,
+                $mac,
+                (string)$eqLogic->getConfiguration('device_key'),
+                (string)$eqLogic->getConfiguration('cipher', 'v1')
+            );
+            foreach ($result['steps'] as $step) {
+                log::add('airwell', 'debug', "diagnose [{$eqLogic->getName()}] {$step['step']}: {$step['status']} — {$step['message']}"
+                    . ($step['details'] !== '' ? " ({$step['details']})" : ''));
+            }
+            log::add('airwell', 'debug', "diagnose [{$eqLogic->getName()}] conclusion: {$result['conclusion']}");
+            $result['ip']  = $ip;
+            $result['mac'] = $mac;
             ajax::success($result);
             break;
 

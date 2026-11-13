@@ -159,24 +159,46 @@ class GreeProtocol {
 
         $devices = [];
         foreach ($responses as $r) {
-            $envelope = json_decode($r['raw'], true);
-            if (!isset($envelope['pack'])) continue;
-
-            // scan responses use V1 generic key regardless of device cipher version
-            $pack = self::decryptV1($envelope['pack'], self::GENERIC_KEY_V1);
-            if (($pack['t'] ?? '') !== 'dev') continue;
-
-            $devices[] = [
-                'ip'        => $r['ip'],
-                'mac'       => $pack['mac']       ?? $pack['cid'] ?? '',
-                'name'      => $pack['name']      ?? '',
-                'ver'       => $pack['ver']        ?? '',
-                'brand'     => $pack['brand']      ?? '',
-                'modelType' => $pack['ModelType']  ?? '',
-                'hid'       => $pack['hid']        ?? '',
-            ];
+            $device = self::parseScanResponse($r['raw'], $r['ip']);
+            if ($device !== null) {
+                $devices[] = $device;
+            }
         }
         return $devices;
+    }
+
+    /**
+     * Send the discovery request directly to one IP (unicast) instead of broadcasting it.
+     * Useful when broadcast is filtered but the device is reachable.
+     *
+     * @return array|null Same shape as a discover() item, or null if the device did not answer
+     */
+    public static function probe(string $ip, int $timeout = 3): ?array {
+        try {
+            $raw = self::udpSend($ip, json_encode(['t' => 'scan']), $timeout);
+            return self::parseScanResponse($raw, $ip);
+        } catch (RuntimeException $e) {
+            return null;
+        }
+    }
+
+    private static function parseScanResponse(string $raw, string $ip): ?array {
+        $envelope = json_decode($raw, true);
+        if (!isset($envelope['pack'])) return null;
+
+        // scan responses use V1 generic key regardless of device cipher version
+        $pack = self::decryptV1($envelope['pack'], self::GENERIC_KEY_V1);
+        if (($pack['t'] ?? '') !== 'dev') return null;
+
+        return [
+            'ip'        => $ip,
+            'mac'       => $pack['mac']       ?? $pack['cid'] ?? '',
+            'name'      => $pack['name']      ?? '',
+            'ver'       => $pack['ver']        ?? '',
+            'brand'     => $pack['brand']      ?? '',
+            'modelType' => $pack['ModelType']  ?? '',
+            'hid'       => $pack['hid']        ?? '',
+        ];
     }
 
     /**

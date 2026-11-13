@@ -57,6 +57,20 @@ Si le scan ne fonctionne toujours pas, vous pouvez ajouter l'équipement à la m
 2. Cliquez sur **Ajouter** dans Jeedom.
 3. Renseignez l'IP et la MAC, sauvegardez, puis cliquez sur l'icône de binding pour établir la connexion.
 
+### 5. Diagnostiquer la connexion
+
+Si le binding échoue (message `GreeProtocol: no response`), cliquez sur le bouton **Diagnostic** de l'équipement, à côté de l'icône de binding. Le plugin teste alors, à partir de l'IP et de la MAC enregistrées :
+
+1. si le climatiseur est sur le même sous-réseau que Jeedom ;
+2. si un appareil répond à cette IP (ping, puis table ARP pour vérifier qu'il a bien la MAC saisie) ;
+3. si le climatiseur répond au protocole Gree quand on l'interroge directement ;
+4. s'il est trouvé par le scan standard et par le broadcast de chaque réseau de Jeedom ;
+5. si la clé obtenue lors du binding est acceptée.
+
+Le rapport se termine par une conclusion qui indique la cause la plus probable et quoi faire. Si le climatiseur a changé d'IP, ou si la MAC saisie est fausse, un bouton permet de reporter la bonne valeur dans l'équipement. Il reste ensuite à sauvegarder et à relancer le binding.
+
+Si vous demandez de l'aide, joignez le rapport : bouton **Copier le rapport**.
+
 ## Commandes disponibles
 
 | Commande | Type | Description |
