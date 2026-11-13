@@ -17,9 +17,9 @@ Install the plugin from the Jeedom Market, then activate it.
 
 1. Go to **Plugins > Comfort > Airwell**
 2. Click **Add**
-3. Enter the IP address and MAC address of the air conditioner
-4. Click the binding icon to establish the connection
-5. Save
+3. Enter the IP address and MAC address of the air conditioner (any MAC format is accepted: `7C:B8:E6:25:1C:43`, `7c-b8-e6-25-1c-43`, `7cb8e6251c43`…)
+4. Save
+5. Click the binding icon to establish the connection
 
 ## What to do if my devices are not found?
 
@@ -53,7 +53,7 @@ If the scan still does not work, you can add the device manually:
 
 1. Find the IP address and MAC address of the air conditioner in your router/box.
 2. Click **Add** in Jeedom.
-3. Enter the IP and MAC, then click the binding icon to establish the connection.
+3. Enter the IP and MAC, save, then click the binding icon to establish the connection.
 
 ## Available Commands
 
